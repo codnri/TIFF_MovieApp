@@ -1,5 +1,7 @@
 import React from "react";
 import Movie from "./Movie";
+
+const api_key = "6156345e952a1ea8f63f83962610e7c9";
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -11,6 +13,39 @@ class App extends React.Component {
     };
   }
 
+  componentDidMount() {
+    console.log("this.state.movies");
+    console.log(this.state.movies);
+  }
+  addDetailsToMovie = (movie, callback) => {
+    return new Promise((resolve, reject) => {
+      // console.log(movie);
+      const url = `https://api.themoviedb.org/3/movie/${
+        movie.id
+      }?api_key=${api_key}`;
+      console.log(url);
+      fetch(url)
+        .then(res => res.json())
+        .then(
+          result => {
+            console.log(result);
+            movie.details = result;
+            this.setState(prevState => {
+              movies: [...prevState.movies, movie];
+            });
+            callback(movie);
+            resolve();
+          },
+          error => {
+            this.setState({
+              isLoaded: true,
+              error
+            });
+            reject();
+          }
+        );
+    });
+  };
   sortMoviesByReleaseDate = () => {
     let movies = this.state.movies;
 
@@ -42,9 +77,8 @@ class App extends React.Component {
 
   getMoviesByPage = page_num => {
     const year = new Date().getFullYear();
-    fetch(
-      `https://api.themoviedb.org/3/discover/movie?api_key=6156345e952a1ea8f63f83962610e7c9&language=en-US&sort_by=popularity.desc&include_video=false&page=${page_num}&primary_release_year=${year}`
-    )
+    const url = `https://api.themoviedb.org/3/discover/movie?api_key=6156345e952a1ea8f63f83962610e7c9&language=en-US&sort_by=popularity.desc&include_video=false&page=${page_num}&primary_release_year=${year}`;
+    fetch(url)
       .then(res => res.json())
       .then(
         result => {
@@ -76,50 +110,54 @@ class App extends React.Component {
         }
       );
   };
-  componentDidMount() {
+  componentWillMount() {
     // this.getMoviesByPage(1);
 
     //--for single record test purpose--
-    this.setState({
-      movies: [
-        {
-          vote_count: 0,
-          id: 501121,
-          video: false,
-          vote_average: 0,
-          title: "The Queen of Spades",
-          popularity: 11.305,
-          poster_path: "/6Q9HloaX7PQN6tkqFpAv5qE3fkP.jpg",
-          original_language: "ru",
-          original_title: "La dame de pique",
-          genre_ids: [10402],
-          backdrop_path: null,
-          adult: false,
-          overview:
-            "The dark world of Tchaikovsky’s penultimate operatic masterpiece Queen of Spades hinges on obsession, greed, and a secret in winning at cards… In 2005, the Opéra Bastille mounted a compelling production featuring Vladimir Galouzine as the mad lover Hermann, Hasmik Papian as the doomed Lisa, and Irina Bogatcheva as the mysterious Comtesse.",
-          release_date: "2019-01-22"
-        },
-        {
-          vote_count: 0,
-          id: 501122,
-          video: false,
-          vote_average: 0,
-          title: "The Queen of Spades 2",
-          popularity: 10.305,
-          poster_path: "/6Q9HloaX7PQN6tkqFeeepAv5qE3fkP.jpg",
-          original_language: "ru",
-          original_title: "La dame de pique",
-          genre_ids: [10402],
-          backdrop_path: null,
-          adult: false,
-          overview:
-            "The dark world of Tchaikovsky’s penultimate operatic masterpiece Queen of Spades hinges on obsession, greed, and a secret in winning at cards… In 2005, the Opéra Bastille mounted a compelling production featuring Vladimir Galouzine as the mad lover Hermann, Hasmik Papian as the doomed Lisa, and Irina Bogatcheva as the mysterious Comtesse.",
-          release_date: "2019-03-22"
-        }
-      ]
-    });
+
+    const movies = [
+      {
+        vote_count: 0,
+        id: 501121,
+        video: false,
+        vote_average: 0,
+        title: "The Queen of Spades",
+        popularity: 11.305,
+        poster_path: "/6Q9HloaX7PQN6tkqFpAv5qE3fkP.jpg",
+        original_language: "ru",
+        original_title: "La dame de pique",
+        genre_ids: [10402],
+        backdrop_path: null,
+        adult: false,
+        overview:
+          "The dark world of Tchaikovsky’s penultimate operatic masterpiece Queen of Spades hinges on obsession, greed, and a secret in winning at cards… In 2005, the Opéra Bastille mounted a compelling production featuring Vladimir Galouzine as the mad lover Hermann, Hasmik Papian as the doomed Lisa, and Irina Bogatcheva as the mysterious Comtesse.",
+        release_date: "2019-01-22"
+      },
+      {
+        vote_count: 0,
+        id: 440472,
+        video: false,
+        vote_average: 0,
+        title: "The Queen of Spades 2",
+        popularity: 10.305,
+        poster_path: "/6Q9HloaX7PQN6tkqFeeepAv5qE3fkP.jpg",
+        original_language: "ru",
+        original_title: "La dame de pique",
+        genre_ids: [10402],
+        backdrop_path: null,
+        adult: false,
+        overview:
+          "The dark world of Tchaikovsky’s penultimate operatic masterpiece Queen of Spades hinges on obsession, greed, and a secret in winning at cards… In 2005, the Opéra Bastille mounted a compelling production featuring Vladimir Galouzine as the mad lover Hermann, Hasmik Papian as the doomed Lisa, and Irina Bogatcheva as the mysterious Comtesse.",
+        release_date: "2019-03-22"
+      }
+    ];
+    this.setState({ movies });
+    console.log(this.state.movies);
   }
 
+  handleOpenModal = movie => {
+    console.log(movie);
+  };
   render() {
     return (
       <div className="App">
@@ -128,7 +166,7 @@ class App extends React.Component {
         {this.state.movies.map(movie => {
           return (
             <div>
-              <Movie movie={movie} />
+              <Movie movie={movie} key={movie.id} />
             </div>
           );
         })}
