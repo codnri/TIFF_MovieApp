@@ -1,7 +1,11 @@
 import React from "react";
 import Movie from "./Movie";
+import { THEMOVIEDB_API_KEY } from "../../config.js";
+const loadsize =
+  (Math.floor(window.innerHeight / 430) + 1) *
+  Math.floor((window.innerWidth - 180) / 250);
+const api_key = THEMOVIEDB_API_KEY || process.env.THEMOVIEDB_API_KEY;
 
-const api_key = "6156345e952a1ea8f63f83962610e7c9";
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -13,45 +17,42 @@ class App extends React.Component {
       current_page: 0,
       isLoading: false,
       lastpage: 0,
-      hasLoadedAll: false
+      hasLoadedAll: false,
+      num_of_current_displayed: 0
     };
   }
 
   componentDidMount() {
-    console.log("this.state.movies");
-    console.log(this.state);
     document.addEventListener("scroll", this.trackScrolling);
   }
 
   // lazy loading
   trackScrolling = () => {
-    if (this.state.hasLoadedAll) {
-      console.log("end");
+    if (this.state.hasLoadedAll || this.state.isLoading) {
       return false;
     }
 
-    if (window.pageYOffset + window.innerHeight > document.body.clientHeight) {
-      console.log("header bottom reached");
-
+    if (
+      window.pageYOffset + window.innerHeight + 50 >
+      document.body.clientHeight
+    ) {
       this.setState({ isLoading: true });
       setTimeout(() => {
-        this.getMoviesSinglePage(this.state.current_page + 1);
-      }, 2000);
-      //document.removeEventListener("scroll", this.trackScrolling);
+        this.showMore(loadsize);
+        this.setState({ isLoading: false });
+      }, 1200);
     }
   };
   addDetailsToMovie = (movie, callback) => {
     return new Promise((resolve, reject) => {
-      // console.log(movie);
       const url = `https://api.themoviedb.org/3/movie/${
         movie.id
       }?api_key=${api_key}`;
-      console.log(url);
+
       fetch(url)
         .then(res => res.json())
         .then(
           result => {
-            console.log(result);
             movie.details = result;
             this.setState(prevState => {
               movies: [...prevState.movies, movie];
@@ -76,7 +77,6 @@ class App extends React.Component {
       return a.release_date < b.release_date ? -1 : 1;
     });
     this.setState({ movies });
-    // release_date
   };
   removeLowPopularityMovies = () => {
     let movies = this.state.movies;
@@ -98,50 +98,6 @@ class App extends React.Component {
     return false;
   };
 
-  getMoviesSinglePage = page_num => {
-    const year = new Date().getFullYear();
-    const url = `https://api.themoviedb.org/3/discover/movie?api_key=6156345e952a1ea8f63f83962610e7c9&language=en-US&sort_by=popularity.desc&include_video=false&page=${page_num}&primary_release_year=${year}`;
-    fetch(url)
-      .then(res => res.json())
-      .then(
-        result => {
-          console.log("result.page");
-          console.log(result.page);
-
-          this.setState(prevState => ({
-            isLoaded: true,
-            movies: [...prevState.movies, ...result.results],
-            total_pages: result.total_pages,
-            current_page: result.page
-          }));
-          console.log(this.hasLowPopularityMovie());
-          if (
-            page_num >= this.state.total_pages ||
-            this.hasLowPopularityMovie()
-          ) {
-            // console.log("lastpage");
-            // console.log(page_num);
-            this.setState({ hasLoadedAll: true });
-            this.removeLowPopularityMovies();
-            this.sortMoviesByReleaseDate();
-            console.log(this.state);
-            return false;
-          } else {
-            console.log(this.state);
-
-            return false;
-            // this.getMoviesByPage(page_num + 1);
-          }
-        },
-        error => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      );
-  };
-
   getMoviesByPage = page_num => {
     const year = new Date().getFullYear();
     const url = `https://api.themoviedb.org/3/discover/movie?api_key=6156345e952a1ea8f63f83962610e7c9&language=en-US&sort_by=popularity.desc&include_video=false&page=${page_num}&primary_release_year=${year}`;
@@ -156,14 +112,14 @@ class App extends React.Component {
             movies: [...prevState.movies, ...result.results],
             total_pages: result.total_pages
           }));
-          console.log(this.hasLowPopularityMovie());
+          // console.log(this.hasLowPopularityMovie());
           if (
             page_num >= this.state.total_pages ||
             this.hasLowPopularityMovie()
           ) {
             this.removeLowPopularityMovies();
             this.sortMoviesByReleaseDate();
-            console.log(this.state.movies);
+            // console.log(this.state.movies);
             return false;
           } else {
             this.getMoviesByPage(page_num + 1);
@@ -179,12 +135,6 @@ class App extends React.Component {
   };
 
   componentWillMount() {
-    // document.removeEventListener("scroll", this.trackScrolling);
-
-    // this.getMoviesByPage(1);
-
-    //--for single record test purpose--
-
     const movies = [
       {
         vote_count: 0,
@@ -222,33 +172,42 @@ class App extends React.Component {
       }
     ];
 
-    // this.setState({ movies });
-    this.getMoviesSinglePage(1);
-    console.log(this.state.movies);
+    if (loadsize == 0) loadsize = 5;
+
+    this.setState({ num_of_current_displayed: loadsize });
+    this.getMoviesByPage(1);
   }
 
-  handleOpenModal = movie => {
-    console.log(movie);
+  showMore = additional_num => {
+    this.setState(prevState => ({
+      num_of_current_displayed:
+        prevState.num_of_current_displayed + additional_num
+    }));
   };
   render() {
-    const { isLoading, hasLoadedAll } = this.state;
+    const {
+      movies,
+      isLoading,
+      hasLoadedAll,
+      num_of_current_displayed
+    } = this.state;
     return (
       <div className="App">
-        <h1>Hello CodeSandbox</h1>
-        <h2>Start editing to see some magic happen!</h2>
         <div className="mv-container mv-align-center">
-          {this.state.movies.map(movie => {
-            return (
-              <div>
-                <Movie movie={movie} key={movie.id} />
-              </div>
-            );
-          })}
+          {movies
+            .filter((el, index) => index < num_of_current_displayed)
+            .map(movie => {
+              return (
+                <div>
+                  <Movie movie={movie} key={movie.id} />
+                </div>
+              );
+            })}
         </div>
 
-        {isLoading && !hasLoadedAll ? (
-          <div>
-            <i class="fas fa-spinner fa-3x fa-spin" />{" "}
+        {isLoading && num_of_current_displayed < movies.length ? (
+          <div class="load">
+            <i class="fas fa-spinner fa-3x fa-spin" />
           </div>
         ) : (
           ""
