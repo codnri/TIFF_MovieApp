@@ -9,14 +9,37 @@ class App extends React.Component {
       movies: [],
       error: null,
       isLoaded: false,
-      total_pages: 0
+      total_pages: 0,
+      current_page: 0,
+      isLoading: false,
+      lastpage: 0,
+      hasLoadedAll: false
     };
   }
 
   componentDidMount() {
     console.log("this.state.movies");
-    console.log(this.state.movies);
+    console.log(this.state);
+    document.addEventListener("scroll", this.trackScrolling);
   }
+
+  // lazy loading
+  trackScrolling = () => {
+    if (this.state.hasLoadedAll) {
+      console.log("end");
+      return false;
+    }
+
+    if (window.pageYOffset + window.innerHeight > document.body.clientHeight) {
+      console.log("header bottom reached");
+
+      this.setState({ isLoading: true });
+      setTimeout(() => {
+        this.getMoviesSinglePage(this.state.current_page + 1);
+      }, 2000);
+      //document.removeEventListener("scroll", this.trackScrolling);
+    }
+  };
   addDetailsToMovie = (movie, callback) => {
     return new Promise((resolve, reject) => {
       // console.log(movie);
@@ -75,6 +98,50 @@ class App extends React.Component {
     return false;
   };
 
+  getMoviesSinglePage = page_num => {
+    const year = new Date().getFullYear();
+    const url = `https://api.themoviedb.org/3/discover/movie?api_key=6156345e952a1ea8f63f83962610e7c9&language=en-US&sort_by=popularity.desc&include_video=false&page=${page_num}&primary_release_year=${year}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(
+        result => {
+          console.log("result.page");
+          console.log(result.page);
+
+          this.setState(prevState => ({
+            isLoaded: true,
+            movies: [...prevState.movies, ...result.results],
+            total_pages: result.total_pages,
+            current_page: result.page
+          }));
+          console.log(this.hasLowPopularityMovie());
+          if (
+            page_num >= this.state.total_pages ||
+            this.hasLowPopularityMovie()
+          ) {
+            // console.log("lastpage");
+            // console.log(page_num);
+            this.setState({ hasLoadedAll: true });
+            this.removeLowPopularityMovies();
+            this.sortMoviesByReleaseDate();
+            console.log(this.state);
+            return false;
+          } else {
+            console.log(this.state);
+
+            return false;
+            // this.getMoviesByPage(page_num + 1);
+          }
+        },
+        error => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      );
+  };
+
   getMoviesByPage = page_num => {
     const year = new Date().getFullYear();
     const url = `https://api.themoviedb.org/3/discover/movie?api_key=6156345e952a1ea8f63f83962610e7c9&language=en-US&sort_by=popularity.desc&include_video=false&page=${page_num}&primary_release_year=${year}`;
@@ -110,7 +177,10 @@ class App extends React.Component {
         }
       );
   };
+
   componentWillMount() {
+    // document.removeEventListener("scroll", this.trackScrolling);
+
     // this.getMoviesByPage(1);
 
     //--for single record test purpose--
@@ -140,7 +210,7 @@ class App extends React.Component {
         vote_average: 0,
         title: "The Queen of Spades 2",
         popularity: 10.305,
-        poster_path: "/6Q9HloaX7PQN6tkqFeeepAv5qE3fkP.jpg",
+        poster_path: "/6Q9HloaX7PQN6tkqFpAv5qE3fkP.jpg",
         original_language: "ru",
         original_title: "La dame de pique",
         genre_ids: [10402],
@@ -151,7 +221,9 @@ class App extends React.Component {
         release_date: "2019-03-22"
       }
     ];
-    this.setState({ movies });
+
+    // this.setState({ movies });
+    this.getMoviesSinglePage(1);
     console.log(this.state.movies);
   }
 
@@ -159,17 +231,28 @@ class App extends React.Component {
     console.log(movie);
   };
   render() {
+    const { isLoading, hasLoadedAll } = this.state;
     return (
       <div className="App">
         <h1>Hello CodeSandbox</h1>
         <h2>Start editing to see some magic happen!</h2>
-        {this.state.movies.map(movie => {
-          return (
-            <div>
-              <Movie movie={movie} key={movie.id} />
-            </div>
-          );
-        })}
+        <div className="mv-container mv-align-center">
+          {this.state.movies.map(movie => {
+            return (
+              <div>
+                <Movie movie={movie} key={movie.id} />
+              </div>
+            );
+          })}
+        </div>
+
+        {isLoading && !hasLoadedAll ? (
+          <div>
+            <i class="fas fa-spinner fa-3x fa-spin" />{" "}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     );
   }

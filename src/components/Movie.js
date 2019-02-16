@@ -53,44 +53,59 @@ class Movie extends React.Component {
     }
     // this.props.handleOpenModal(this.props.movie);
   };
-  handleCloseModal = () => {
+  handleCloseModal = e => {
     this.setState({ showModal: false });
   };
   render() {
     return (
       <div>
-        <ul>
-          <li>title: {this.state.movie.title}</li>
-          <li>popularity: {this.state.movie.popularity}</li>
-          <li>release date: {this.state.movie.release_date}</li>
-          {/*<li>{this.state.movie.overview}</li>
-          <li>{this.state.movie.genre_ids}</li>
-          <li>{this.state.movie.id}</li>*/}
-        </ul>
-        <button onClick={this.onClickDetailButton}>Detail</button>
+        <div className="card" onClick={this.onClickDetailButton}>
+          <div id="popularity">
+            {Math.round(this.state.movie.popularity * 100) / 100}
+          </div>
+          {this.state.movie.poster_path ? (
+            <img
+              src={
+                "https://image.tmdb.org/t/p/w500/" +
+                this.state.movie.poster_path
+              }
+              alt={this.state.movie.title}
+            />
+          ) : (
+            <div className="no-image">
+              <img src="./img/no-image-icon.jpg" />
+            </div>
+          )}
+          <div id="title">{this.state.movie.title}</div>
+
+          <div id="release-date">{this.state.movie.release_date}</div>
+        </div>
         <ReactModal
           isOpen={this.state.showModal}
           contentLabel="Details"
           className="Modal"
           overlayClassName="Overlay"
-          onRequestClose={this.props.handleCloseModal}
+          onRequestClose={this.handleCloseModal}
         >
           {this.state.movie.details && (
             <div>
-              Details of {this.state.movie.title}
+              <i
+                class="fas fa-times-circle fa-2x"
+                onClick={this.handleCloseModal}
+              />
+              <div className="title">{this.state.movie.title}</div>
               <ul>
                 <li>runtime: {this.state.movie.details.runtime}</li>
                 <li>tagline: {this.state.movie.details.tagline}</li>
                 <li>overview: {this.state.movie.details.overview}</li>
                 <li>
-                  genres:
+                  genres:&nbsp;&nbsp;
                   {this.state.movie.details.genres &&
                     this.state.movie.details.genres.map(
                       genre => genre.name + " "
                     )}
                 </li>
               </ul>
-              <button onClick={this.handleCloseModal}>Close Modal</button>
             </div>
           )}
         </ReactModal>
