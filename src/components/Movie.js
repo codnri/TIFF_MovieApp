@@ -84,9 +84,9 @@ class Movie extends React.Component {
           onRequestClose={this.handleCloseModal}
         >
           {movie.details && (
-            <div>
+            <div className="modal-container">
               <i
-                className="fas fa-times-circle fa-2x"
+                className="fas fa-times-circle"
                 onClick={this.handleCloseModal}
               />
               <div className="modal-header">
@@ -100,7 +100,6 @@ class Movie extends React.Component {
                 {movie.details.overview && (
                   <li>
                     <small>Overview:&nbsp;</small>
-                    <br />
                     <span className="overview">{movie.details.overview}</span>
                   </li>
                 )}
@@ -113,10 +112,12 @@ class Movie extends React.Component {
 
                 <li>
                   <small>Genres:&nbsp;</small>
-                  {movie.details.genres &&
-                    movie.details.genres.map(genre => {
-                      return <div className="genre">{genre.name}</div>;
-                    })}
+                  <div className="genres">
+                    {movie.details.genres &&
+                      movie.details.genres.map(genre => {
+                        return <div className="genre">{genre.name}</div>;
+                      })}
+                  </div>
                 </li>
               </ul>
             </div>

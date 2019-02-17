@@ -1,7 +1,7 @@
 import React from "react";
 import Movie from "./Movie";
 import { THEMOVIEDB_API_KEY } from "../../config.js";
-const loadsize =
+let loadsize =
   (Math.floor(window.innerHeight / 430) + 1) *
   Math.floor((window.innerWidth - 180) / 250);
 const api_key = THEMOVIEDB_API_KEY || process.env.THEMOVIEDB_API_KEY;

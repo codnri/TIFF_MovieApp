@@ -57,7 +57,7 @@ nav img {
   left: 50%;
   display: block;
   padding: 2em;
-  min-width: 200px;
+  min-width: 300px;
   max-width: 70%;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
@@ -69,10 +69,13 @@ nav img {
   transform: translate(-50%, -50%);
   outline: transparent;
 }
+.Modal .modal-container {
+}
 .Modal i {
   position: absolute;
   top: 15px;
   right: 15px;
+  font-size: 40px;
   cursor: pointer;
 }
 
@@ -89,12 +92,19 @@ nav img {
   display: flex;
   flex-direction: row;
 }
+.Modal ul .genres {
+  display: flex;
+  align-items: left;
+}
 .Modal ul li .genre {
+  display: inline;
   font-size: 15px;
-  margin: 0 5px;
+  margin: 5px 5px;
   padding: 2px;
   border: solid 3px white;
   border-radius: 6px;
+
+  /* width: 100%; */
 }
 .Modal ul li .overview {
   font-size: 19px;
@@ -214,4 +224,74 @@ nav img {
 
 .load {
   text-align: center;
+}
+
+/* Responsive */
+@media all and (max-width: 600px) {
+  .modal-container {
+    /* background-color: red; */
+    max-height: 500px;
+    text-align: left;
+    overflow-y: auto;
+    margin-left: 5px;
+    padding: 0;
+  }
+}
+@media all and (max-width: 400px) {
+  .ReactModal__Body--open {
+    overflow-y: hidden;
+  }
+
+  .Modal i {
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+  }
+  .Modal {
+    /* top: unset; */
+    position: absolute;
+
+    top: 270px;
+    margin: 0 auto;
+    padding: 10px 10px;
+  }
+  .modal-container {
+    /* background-color: red; */
+    max-height: 400px;
+    text-align: left;
+    overflow-y: auto;
+    margin-left: 5px;
+    padding: 0;
+  }
+  .Modal .title {
+    font-size: 19px;
+    font-weight: 400;
+    margin-top: 30px;
+
+    padding: 3px 0 3px 0;
+  }
+  .Modal ul li {
+    padding: 5px 0px;
+    margin: 0 auto;
+    width: 100%;
+    display: unset;
+    /* flex-direction: row; */
+  }
+  .Modal ul .genres {
+    /* background-color: red; */
+    margin-top: 10px;
+  }
+  .Modal ul {
+    padding: 0;
+    margin: 0;
+  }
+  .Modal ul li small {
+    /* background-color: red; */
+    margin: 5px 0;
+  }
+  .Modal ul li small:before,
+  .Modal ul li small:after {
+    content: "\A";
+    white-space: pre;
+  }
 }
