@@ -50,6 +50,11 @@ nav img {
   margin: 0 auto;
   width: 100%;
 }
+
+.ReactModal__Body--open {
+  overflow-y: hidden;
+}
+
 .Modal {
   z-index: 9;
   position: absolute;
@@ -69,8 +74,7 @@ nav img {
   transform: translate(-50%, -50%);
   outline: transparent;
 }
-.Modal .modal-container {
-}
+
 .Modal i {
   position: absolute;
   top: 15px;
@@ -238,10 +242,6 @@ nav img {
   }
 }
 @media all and (max-width: 400px) {
-  .ReactModal__Body--open {
-    overflow-y: hidden;
-  }
-
   .Modal i {
     top: 10px;
     right: 10px;
